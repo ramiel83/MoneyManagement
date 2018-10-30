@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <meta id="testViewport" name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Expense Management</title>
+
+    <script src="lib/js/jquery-2.2.3.min.js"></script>
+    <script src="lib/js/moment.js"></script>
+    <link rel="stylesheet" href="lib/css/bootstrap.css"/>
+    <link rel="stylesheet" href="lib/css/bootstrap-datetimepicker.css"/>
+    <link rel="stylesheet" href="lib/css/bootstrap-theme.css"/>
+    <script src="lib/js/bootstrap.js"></script>
+    <script src="lib/js/bootstrap-datetimepicker.js"></script>
+    <script src="lib/js/d3.js"></script>
+    <script src="lib/js/d3pie.js"></script>
+    <script src="lib/js/dimple.v2.1.6.js"></script>
+    <link rel="stylesheet" href="main.css"/>
+    <script src="main.js"></script>
+    <link rel="stylesheet" href="theme.min.css"/>
+</head>
+<body>
+<div data-role="page" id="home_page">
+    <!-- header -->
+    <div class="page-header">
+        <h1>Money Management</h1>
+    </div>
+    <!-- /header -->
+    <!-- content -->
+    <div>
+        <img src="img/Money-Management.jpg" alt="Logo"/>
+        <p>Enter your user and password:</p>
+        <table class="table table-bordered table-hover table-striped">
+            <tr>
+                <td>Username:</td>
+                <td><input type="text" id="user_name" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td>Password:</td>
+                <td><input type="password" id="password" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <!-- login button -->
+                    <input type="button" id="login_submit" value="Submit" class="btn btn-default"/>
+                </td>
+            </tr>
+        </table>
+    </div>
+    <!-- /content -->
+</div>
+
+<div data-role="page" id="menu_page" class="page_hidden">
+    <!-- header -->
+    <div class="page-header">
+        <!-- after login, the current_user_name will be filled by javascript -->
+        <h1>Hello <span id="current_user_name"></span></h1>
+    </div>
+    <!-- /header -->
+    <!-- content -->
+    <div>
+        <p>Lets start to manage your money...</p>
+        <br/>
+        <!-- Menu options -->
+        <table>
+            <tr>
+                <td><img src="img/settings.png" /></td>
+                <td><input type="button" value="Settings" id="settings_button" class="btn btn-default"/></td>
+            </tr>
+            <tr>
+                <td><img src="img/search.png" /></td>
+                <td><input type="button" value="View / Edit Transactions" id="transactions_button" class="btn btn-default"/></td>
+            </tr>
+            <tr>
+                <td><img src="img/add.png" /></td>
+                <td><input type="button" value="Enter New Transaction" id="new_transaction_button" class="btn btn-default"/></td>
+            </tr>
+        </table>
+    </div>
+    <!-- /content -->
+</div>
+
+<div data-role="page" id="settings_page" class="page_hidden">
+    <!-- header -->
+    <div class="page-header">
+        <h1>Settings</h1>
+    </div>
+    <!-- /header -->
+    <!-- content -->
+    <div>
+        <!-- the max spending table. this table will be filled by javascript + ajax. data from the server -->
+        <table id="max_spending_table" class="table table-bordered table-hover table-striped">
+        </table>
+
+        <!-- back button -->
+        <p><input type="button" value="Menu Page" id="settings_page_back" class="btn btn-default"/></p>
+    </div>
+    <!-- /content -->
+</div>
+
+<div data-role="page" id="new_transaction_page" class="page_hidden">
+    <!-- header -->
+    <div class="page-header">
+        <h1>New Transaction Page</h1>
+    </div>
+    <!-- /header -->
+    <!-- content -->
+    <div>
+        <table class="table table-bordered table-hover table-striped">
+            <tr>
+                <td>Sum:</td>
+                <td><input type="text" id="total" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td>Category:</td>
+                <td>
+                    <!-- category select dropdown menu. this will be filled by data from the server (ajax) -->
+                    <select id="new_transaction_category_select"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>Text:</td>
+                <td><input type="text" id="text" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td>Time:</td>
+                <td>
+                    <div class='input-group date' id='new_transaction_datepicker'>
+                        <input id="transaction_datetime" type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="button" value="Submit New Transaction" id="new_transaction_page_submit"
+                                       class="btn btn-default"/></td>
+            </tr>
+        </table>
+
+        <!-- back button -->
+        <p><input type="button" value="Menu Page" id="new_transaction_page_back" class="btn btn-default"/></p>
+    </div>
+    <!-- /content -->
+</div>
+
+<div data-role="page" id="transactions_page" class="page_hidden">
+    <!-- header -->
+    <div class="page-header">
+        <h1>Transactions</h1>
+    </div>
+    <!-- /header -->
+    <!-- content -->
+    <div>
+        <!-- filter by from, to and categories -->
+        <table class="table table-bordered table-hover table-striped">
+            <tr>
+                <td>From Date</td>
+                <td>
+                    <div class='input-group date' id='transactions_from_date_datepicker'>
+                        <input id="transactions_from_date_datetime" type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>To Date</td>
+                <td>
+                    <div class='input-group date' id='transactions_to_date_datepicker'>
+                        <input id="transactions_to_date_datetime" type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td>Categories:</td>
+                <td>
+                    <select id="transactions_category_select">
+                        <option value="">All</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <!-- the search button -->
+                    <input type="button" value="Search Transactions" id="search_transactions_button"
+                           class="btn btn-default"/>
+                </td>
+            </tr>
+        </table>
+
+        <table class="table table-bordered table-hover table-striped" id="transactions_results">
+        </table>
+
+        <!-- pie chart after filtering -->
+        <h1>Expenses By Categories</h1>
+        <div id="pie"></div>
+        <!-- stick chart after filtering -->
+        <h1>Expenses By Month</h1>
+        <div id="chart"></div>
+
+        <!-- back button -->
+        <p><input type="button" value="Menu Page" id="transactions_page_back" class="btn btn-default"/></p>
+    </div>
+    <!-- /content -->
+</div>
+
+<div data-role="page" id="edit_transaction_page" class="page_hidden">
+    <!-- header -->
+    <div class="page-header">
+        <h1>Edit Transaction Page</h1>
+    </div>
+    <!-- /header -->
+    <!-- content - all of the data will be filled when the user gets here. according to the edited transaction -->
+    <div>
+        <input type="hidden" id="edit_transaction_id"/>
+        <table class="table table-bordered table-hover table-striped">
+            <tr>
+                <td>Sum:</td>
+                <td><input type="text" id="edit_total" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td>Category:</td>
+                <td><select id="edit_transaction_category_select"></select>
+                </td>
+            </tr>
+            <tr>
+                <td>Text:</td>
+                <td><input type="text" id="edit_text" class="form-control"/></td>
+            </tr>
+            <tr>
+                <td>Time:</td>
+                <td>
+                    <div class='input-group date' id='edit_transaction_datepicker'>
+                        <input id="edit_transaction_datetime" type='text' class="form-control"/>
+                    <span class="input-group-addon">
+                        <span class="glyphicon glyphicon-calendar"></span>
+                    </span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2"><input type="button" value="Edit Transaction" id="edit_transaction_page_submit"
+                                       class="btn btn-default"/></td>
+            </tr>
+        </table>
+
+        <!-- back button -->
+        <p><input type="button" value="Transactions Page" id="edit_transaction_page_back" class="btn btn-default"/></p>
+    </div>
+    <!-- /content -->
+</div>
+</body>
+</html>
